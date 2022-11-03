@@ -29,7 +29,7 @@ function init(){
             'Update an employee role',
             'Update employee managers',
             'View employee by manager',
-            'View employee by department',
+            'View employee by department',  
             'Delete a department',
             'Delete a role',
             'Delet an employee',
@@ -56,6 +56,14 @@ createDepartment();
 
 if(answers.choices === "Add a role"){
 createRole();
+};
+
+if(answers.choices === "Add an employee"){
+createEmployee();
+};
+
+if(answers.choices === "Update an employee role"){
+updateRole();
 };
 
 });
@@ -110,7 +118,7 @@ async function getEmployees(){
 }
 
 //insert departmenet to departments
-function createDepartment(department_name){
+function createDepartment(){
     inquirer.prompt([
     {
     type: 'input',
@@ -132,8 +140,8 @@ function createDepartment(department_name){
     VALUES(?)
     `
     pool.query(sql,answer.addDept);
-    getDepartments();
-
+   console.log(`Successfully inserted ${answer.addDept} department!`)
+init();
     })
 }
 
@@ -142,13 +150,15 @@ function createDepartment(department_name){
 async function createRole(){
 
 //get the list of all department with department_id to make the choices object list
-    const dept = [];
+    var dept = [];
     const result = await pool.query("SELECT id AS id, department_name As name FROM departments");
-    result.forEach(dep =>{
+
+    result[0].forEach(dep =>{
     let qObj = {
         name: dep.name,
         value: dep.id
     }
+
     dept.push(qObj); 
     });
 
@@ -171,10 +181,88 @@ async function createRole(){
 
     ])
     .then(answer => {
-    const sql = `INSERT INTO ROLES (title, salary, department_id) VALUES (?, ?, ?)`
+    const sql = `INSERT INTO ROLES (title, salary, department_id) VALUES (?, ?, ?)`;
     pool.query(sql, [answer.title, answer.salary,answer.dept]);
 
-    getRoles();
-
+    console.log(`Successfully inserted ${answer.title} role!`)
+init();
     })
+}
+
+//add a new employee
+async function createEmployee(){
+//get the list of all roles with role_id to make the choices of employee's role
+    const choiceRole =[];
+    const roleResult = await pool.query("SELECT * FROM roles");
+    
+    roleResult[0].forEach(({title, id}) => {
+    choiceRole.push({
+    name: title,
+    value: id
+    }) 
+    });
+
+//get the list of all employee with employee_id to make the choices of employee's manager
+    const choiceManager =[
+    {
+    name:'None',
+    value: 0
+    }
+   ];
+    const result = await pool.query("SELECT * FROM employees");
+    
+    result[0].forEach(({first_name, last_name, id}) => {
+    choiceManager.push({
+    name: first_name + "" + last_name,
+    value: id
+    }) 
+    });
+//add employee's prompt
+    inquirer.prompt([
+    {
+        type: 'input',
+        name:'first_name',
+        message: "what is the employee's first name?",
+        },
+    {
+        type: 'input',
+        name:'last_name',
+        message: "what is the employee's last name?",
+        },
+    {
+        type: 'list',
+        name:'role',
+        message: "what is the employee's role?",
+        choices: choiceRole,
+        },
+    {
+        type: 'list',
+        name:'manager',
+        message: "who is the employee's manager?",
+        choices: choiceManager,
+        },
+    ])
+    .then(answer => {
+//manager id is 0, should return null
+    let manager_id = answer.manager !== 0 ? answer.manager: null;
+    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+        pool.query(sql, [answer.first_name, answer.last_name,answer.role, manager_id]);
+
+        console.log(`Successfully inserted ${answer.first_name} ${answer.last_name} to employees!`)
+    init();
+
+   })
+}
+
+//upadate role
+async function updateRole(){
+
+
+
+
+
+
+
+
+
 }
