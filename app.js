@@ -256,13 +256,48 @@ async function createEmployee(){
 
 //upadate role
 async function updateRole(){
+    const choiceEmployee = [];
+    //get all the employee list
+    const employees = await pool.query('SELECT * FROM employees');
+    employees[0].forEach(({first_name, last_name, id}) => {
+    choiceEmployee.push({
+    name: first_name + "" + last_name,
+    value: id
+    });
+    });
+
+    //get all the role list to make choice of employee's role
+    const choiceRole = [];
+    const roles = await pool.query('SELECT * FROM roles');
+    roles[0].forEach(({title, id}) => {
+    choiceRole.push({
+    name: title,
+    value: id
+    });
+    });
 
 
+    inquirer.prompt([
+    {
+    type: 'list',
+    name:'choiceEmployee',
+    message: "Which employee's role do you want to update?",
+    choices: choiceEmployee,
+    },
+    {
+    type: 'list',
+    name:'choiceRole',
+    message: "Which role do you want to assign the selected employee?",
+    choices: choiceRole,
+    }
+    ])
+    .then(answer => {
+    const sql = `UPDATE employees 
+                SET role_id = ? 
+                WHERE id = ?`;
+    pool.query(sql, [answer.choiceRole, choiceEmployee]);
+    console.log("successfully updated employee's role!");
+    init();
 
-
-
-
-
-
-
+    })
 }
