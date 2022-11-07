@@ -27,9 +27,9 @@ function init(){
             'Add a role',
             'Add an employee',
             'Update an employee role',
-            'Update employee managers',
-            'View employee by manager',
-            'View employee by department',  
+            'Update an employee manager',
+            'View employees by manager',
+            'View employees by department',  
             'Delete a department',
             'Delete a role',
             'Delet an employee',
@@ -66,6 +66,14 @@ if(answers.choices === "Update an employee role"){
 updateRole();
 };
 
+if(answers.choices === "Update an employee manager"){
+updateManager();
+};
+
+if(answers.choices === "View employees by manager"){
+viewEmployeeByManager();
+};
+
 });
 
 
@@ -73,7 +81,7 @@ updateRole();
 
 
 
-//get departments from mysql query
+//=====================get all departments================================
 async function getDepartments(){
     const sql = `SELECT id AS id, department_name As name FROM departments`
     const result = await pool.query(sql);
@@ -81,7 +89,7 @@ async function getDepartments(){
     init()
 }
 
-//get single department from mysql query 
+//=====================get single department============================
 async function getDepartment(id){
     const [rows] = await pool.query(`
     SELECT * 
@@ -92,7 +100,7 @@ async function getDepartment(id){
 }
 
 
-//get roles from mysql query
+//================================get all roles===============================
 async function getRoles(){
     const sql = `SELECT roles.id, roles.title,roles.salary, departments.department_name AS department
                   FROM roles
@@ -103,7 +111,7 @@ async function getRoles(){
     init()
 }
 
-//get all employees from mysql query
+//=========================get all employees=================================
 async function getEmployees(){
     const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
                   FROM employees
@@ -117,7 +125,7 @@ async function getEmployees(){
     init()
 }
 
-//insert departmenet to departments
+//====================insert departmenet to departments=====================
 function createDepartment(){
     inquirer.prompt([
     {
@@ -146,7 +154,7 @@ init();
 }
 
 
-//Add a role to roles
+//==============================Add a role============================
 async function createRole(){
 
 //get the list of all department with department_id to make the choices object list
@@ -189,7 +197,7 @@ init();
     })
 }
 
-//add a new employee
+//===========================add a new employee===============================
 async function createEmployee(){
 //get the list of all roles with role_id to make the choices of employee's role
     const choiceRole =[];
@@ -213,7 +221,7 @@ async function createEmployee(){
     
     result[0].forEach(({first_name, last_name, id}) => {
     choiceManager.push({
-    name: first_name + "" + last_name,
+    name: first_name + " " + last_name,
     value: id
     }) 
     });
@@ -222,23 +230,23 @@ async function createEmployee(){
     {
         type: 'input',
         name:'first_name',
-        message: "what is the employee's first name?",
+        message: "What is the employee's first name?",
         },
     {
         type: 'input',
         name:'last_name',
-        message: "what is the employee's last name?",
+        message: "What is the employee's last name?",
         },
     {
         type: 'list',
         name:'role',
-        message: "what is the employee's role?",
+        message: "What is the employee's role?",
         choices: choiceRole,
         },
     {
         type: 'list',
         name:'manager',
-        message: "who is the employee's manager?",
+        message: "Who is the employee's manager?",
         choices: choiceManager,
         },
     ])
@@ -249,19 +257,20 @@ async function createEmployee(){
         pool.query(sql, [answer.first_name, answer.last_name,answer.role, manager_id]);
 
         console.log(`Successfully inserted ${answer.first_name} ${answer.last_name} to employees!`)
+   
     init();
 
    })
 }
 
-//upadate role
+//===========================upadate role=====================================
 async function updateRole(){
     const choiceEmployee = [];
     //get all the employee list
     const employees = await pool.query('SELECT * FROM employees');
     employees[0].forEach(({first_name, last_name, id}) => {
     choiceEmployee.push({
-    name: first_name + "" + last_name,
+    name: first_name + " " + last_name,
     value: id
     });
     });
@@ -292,12 +301,127 @@ async function updateRole(){
     }
     ])
     .then(answer => {
+
     const sql = `UPDATE employees 
                 SET role_id = ? 
                 WHERE id = ?`;
-    pool.query(sql, [answer.choiceRole, choiceEmployee]);
+    pool.query(sql, [answer.choiceRole, answer.choiceEmployee]);
     console.log("successfully updated employee's role!");
     init();
 
     })
 }
+
+//========================update manager=================================
+
+async function updateManager(){
+
+  const choiceEmployee = [];
+    //get all the employee list
+    const employees = await pool.query('SELECT * FROM employees');
+    employees[0].forEach(({first_name, last_name, id}) => {
+    choiceEmployee.push({
+    name: first_name + " " + last_name,
+    value: id
+    });
+    });
+
+
+//get the list of all employee with employee_id to make the choices of employee's manager
+    const choiceManager =[
+    {
+    name:'None',
+    value: 0
+    }
+   ];
+    const result = await pool.query("SELECT * FROM employees");
+    
+    result[0].forEach(({first_name, last_name, id}) => {
+    choiceManager.push({
+    name: first_name + " " + last_name,
+    value: id
+    }) 
+    });
+
+ inquirer.prompt([
+    {
+    type: 'list',
+    name:'choiceEmployee',
+    message: "Which employee would you like to update?",
+    choices: choiceEmployee,
+    },
+    {
+    type: 'list',
+    name:'choiceManager',
+    message: "Who is the employee's manager?",
+    choices: choiceManager,
+    }
+    ])
+    .then(answer => {
+     let manager_id = answer.choiceManager !== 0 ? answer.choiceManager: null;
+    const sql = `UPDATE employees 
+                SET manager_id = ? 
+                WHERE id = ?`;
+    pool.query(sql, [manager_id, answer.choiceEmployee]);
+    console.log("successfully updated employee's manager!");
+ 
+    init();
+
+    })
+}
+
+//===================view all employee by manager==========================
+
+async function viewEmployeeByManager(){
+
+//get the list of all employee with employee_id to make the choices of employee's manager
+    const choiceManager =[
+    {
+    name:'None',
+    value: 0
+    }
+   ];
+    const result = await pool.query(`SELECT CONCAT (manager.first_name, " ", manager.last_name) AS manager
+                  FROM employees
+                  INNER JOIN employees manager on employees.manager_id = manager.id`);
+    
+// console.log(result);
+    result[0].forEach(({manager, id}) => {
+    choiceManager.push({
+    name: manager,
+    value: id
+    }) 
+    });
+
+
+
+ inquirer.prompt([
+   {
+    type: 'list',
+    name:'choiceManager',
+    message: "Which Manager do you want to view Employees for?",
+    choices: choiceManager,
+    }
+
+])
+ .then(answer => {
+     let manager_id = answer.choiceManager !== 0 ? answer.choiceManager: null;
+    const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
+                  FROM employees
+                  LEFT JOIN employees manager ON employees.manager_id = manager.id
+                  INNER JOIN roles ON employees.role_id = roles.id
+                  INNER JOIN departments ON roles.department_id = departments.id
+                  WHERE employees.manager_id = ?`;
+  
+
+   const result = pool.query(sql, manager_id);
+  console.log(result);
+    console.table(result[0]);
+    init();
+
+    })
+
+}
+
+
+//============= View All Employees By Departments ==========================//
