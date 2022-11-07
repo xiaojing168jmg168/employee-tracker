@@ -74,6 +74,20 @@ if(answers.choices === "View employees by manager"){
 viewEmployeeByManager();
 };
 
+
+
+if(answers.choices === "Delete a department"){
+removeDepartment();
+};
+
+if(answers.choices === "Delete a role"){
+removeRole();
+};
+
+if(answers.choices === "Delet an employee"){
+removeEmployee();
+};
+
 });
 
 
@@ -381,7 +395,7 @@ async function viewEmployeeByManager(){
     value: 0
     }
    ];
-    const result = await pool.query(`SELECT CONCAT (manager.first_name, " ", manager.last_name) AS manager
+    const result = await pool.query(`SELECT manager.id, CONCAT (manager.first_name, " ", manager.last_name) AS manager
                   FROM employees
                   INNER JOIN employees manager on employees.manager_id = manager.id`);
     
@@ -392,7 +406,6 @@ async function viewEmployeeByManager(){
     value: id
     }) 
     });
-
 
 
  inquirer.prompt([
@@ -414,8 +427,8 @@ async function viewEmployeeByManager(){
                   WHERE employees.manager_id = ?`;
   
 
-   const result = pool.query(sql, manager_id);
-  console.log(result);
+   const result = pool.query(sql,manager_id);
+    console.log(result);
     console.table(result[0]);
     init();
 
@@ -425,3 +438,130 @@ async function viewEmployeeByManager(){
 
 
 //============= View All Employees By Departments ==========================//
+
+// async function viewEmployeeByDepartment(){
+
+// inquirer.prompt([
+//    {
+//     type: 'list',
+//     name:'choiceDepartment',
+//     message: "Which Department do you want to view Employees for?",
+//     choices: departmentArr,
+//     }
+
+// ])
+//  .then(answer => {
+
+
+
+// const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
+//                   FROM employees
+//                   LEFT JOIN roles ON employees.role_id = roles.id
+//                   LEFT JOIN departments on roles.department_id = departments.id
+//                   LEFT JOIN employees manager on employees.manager_id = manager.id
+//     `;
+
+
+
+
+// }
+
+
+
+//=========================Remove=============================================
+//Delete a Department
+async function removeDepartment(){
+    const choiceDepartment = [];
+    //get all the employee list
+    const departments = await pool.query('SELECT * FROM departments');
+    console.log(departments[0]);
+    departments[0].forEach(({department_name, id}) => {
+    choiceDepartment.push({
+    name: department_name,
+    value: id
+    });
+    });
+
+       inquirer
+        .prompt([
+          {
+            name: 'choiceEmployee',
+            type: 'list',
+            message: 'Which department would you like to remove?',
+            choices: choiceDepartment
+          }
+        ])
+        .then((answer) => {
+         
+          let sql = `DELETE FROM departments WHERE departments.id = ?`;
+         pool.query(sql, answer.choiceEmployee);
+         console.log(`successfully delete a department!`)
+
+         init();
+          });
+}
+
+//Delete a Role
+async function removeRole(){
+    const choiceRole = [];
+    //get all the employee list
+    const roles = await pool.query('SELECT * FROM roles');
+  
+    roles[0].forEach(({title, id}) => {
+    choiceRole.push({
+    name: title,
+    value: id
+    });
+    });
+
+       inquirer
+        .prompt([
+          {
+            name: 'choiceRole',
+            type: 'list',
+            message: 'Which role would you like to remove?',
+            choices: choiceRole
+          }
+        ])
+        .then((answer) => {
+         
+          let sql = `DELETE FROM roles WHERE roles.id = ?`;
+         pool.query(sql, answer.choiceRole);
+         console.log(`successfully delete a role!`)
+
+         init();
+          });
+
+}
+
+
+// Delete an Employee
+async function removeEmployee(){
+     const choiceEmployee = [];
+    //get all the employee list
+    const employees = await pool.query('SELECT * FROM employees');
+    employees[0].forEach(({first_name, last_name, id}) => {
+    choiceEmployee.push({
+    name: first_name + " " + last_name,
+    value: id
+    });
+    });
+
+      inquirer
+        .prompt([
+          {
+            name: 'choiceEmployee',
+            type: 'list',
+            message: 'Which employee would you like to remove?',
+            choices: choiceEmployee
+          }
+        ])
+        .then((answer) => {
+         
+          let sql = `DELETE FROM employees WHERE employees.id = ?`;
+         pool.query(sql, answer.choiceEmployee);
+         console.log(`successfully delete an employee!`)
+
+         init();
+          });
+  };
