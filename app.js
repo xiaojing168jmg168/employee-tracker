@@ -38,57 +38,61 @@ function init(){
     }
     ])
      .then((answers) =>{
-if(answers.choices === "View all departments"){
-getDepartments();
-};
+        if(answers.choices === "View all departments"){
+        getDepartments();
+        };
 
-if(answers.choices === "View all roles"){
-getRoles();
-};
+        if(answers.choices === "View all roles"){
+        getRoles();
+        };
 
-if(answers.choices === "View all employees"){
-getEmployees();
-};
+        if(answers.choices === "View all employees"){
+        getEmployees();
+        };
 
-if(answers.choices === "Add a Department"){
-createDepartment();
-};
+        if(answers.choices === "Add a Department"){
+        createDepartment();
+        };
 
-if(answers.choices === "Add a role"){
-createRole();
-};
+        if(answers.choices === "Add a role"){
+        createRole();
+        };
 
-if(answers.choices === "Add an employee"){
-createEmployee();
-};
+        if(answers.choices === "Add an employee"){
+        createEmployee();
+        };
 
-if(answers.choices === "Update an employee role"){
-updateRole();
-};
+        if(answers.choices === "Update an employee role"){
+        updateRole();
+        };
 
-if(answers.choices === "Update an employee manager"){
-updateManager();
-};
+        if(answers.choices === "Update an employee manager"){
+        updateManager();
+        };
 
-if(answers.choices === "View employees by manager"){
-viewEmployeeByManager();
-};
+        if(answers.choices === "View employees by manager"){
+        viewEmployeeByManager();
+        };
 
 
 
-if(answers.choices === "Delete a department"){
-removeDepartment();
-};
+        if(answers.choices === "Delete a department"){
+        removeDepartment();
+        };
 
-if(answers.choices === "Delete a role"){
-removeRole();
-};
+        if(answers.choices === "Delete a role"){
+        removeRole();
+        };
 
-if(answers.choices === "Delet an employee"){
-removeEmployee();
-};
+        if(answers.choices === "Delet an employee"){
+        removeEmployee();
+        };
+        
+        if(answers.choices === "View department budgets"){
+        viewBudgets();
+        }
 
-});
+    });
 
 
 };
@@ -268,9 +272,9 @@ async function createEmployee(){
 //manager id is 0, should return null
     let manager_id = answer.manager !== 0 ? answer.manager: null;
     const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-        pool.query(sql, [answer.first_name, answer.last_name,answer.role, manager_id]);
+    pool.query(sql, [answer.first_name, answer.last_name,answer.role, manager_id]);
 
-        console.log(`Successfully inserted ${answer.first_name} ${answer.last_name} to employees!`)
+    console.log(`Successfully inserted ${answer.first_name} ${answer.last_name} to employees!`)
    
     init();
 
@@ -492,8 +496,7 @@ async function removeDepartment(){
           }
         ])
         .then((answer) => {
-         
-          let sql = `DELETE FROM departments WHERE departments.id = ?`;
+         let sql = `DELETE FROM departments WHERE departments.id = ?`;
          pool.query(sql, answer.choiceEmployee);
          console.log(`successfully delete a department!`)
 
@@ -565,3 +568,20 @@ async function removeEmployee(){
          init();
           });
   };
+
+
+//============================viewBudgets========================================
+async function viewBudgets(){
+  console.log('Showing budget by department...\n');
+
+  const sql = `SELECT department_id AS id, 
+                      departments.department_name AS department,
+                      SUM(salary) AS budget
+               FROM  roles  
+               JOIN departments ON roles.department_id = departments.id GROUP BY  department_id`;
+
+  const res = await pool.query(sql)
+
+    console.table(res[0]);
+  init();
+};
