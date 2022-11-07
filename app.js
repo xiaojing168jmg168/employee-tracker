@@ -91,6 +91,9 @@ function init(){
         if(answers.choices === "View department budgets"){
         viewBudgets();
         }
+         if(answers.choices === "Quit"){
+        pool.end();
+        }
 
     });
 
@@ -99,7 +102,7 @@ function init(){
 
 
 
-//=====================get all departments================================
+//====================================get all departments================================
 async function getDepartments(){
     const sql = `SELECT id AS id, department_name As name FROM departments`
     const result = await pool.query(sql);
@@ -107,7 +110,7 @@ async function getDepartments(){
     init()
 }
 
-//=====================get single department============================
+//=================================get single department=======================================
 async function getDepartment(id){
     const [rows] = await pool.query(`
     SELECT * 
@@ -118,7 +121,7 @@ async function getDepartment(id){
 }
 
 
-//================================get all roles===============================
+//=================================get all roles================================================
 async function getRoles(){
     const sql = `SELECT roles.id, roles.title,roles.salary, departments.department_name AS department
                   FROM roles
@@ -129,7 +132,7 @@ async function getRoles(){
     init()
 }
 
-//=========================get all employees=================================
+//==================================get all employees===============================================
 async function getEmployees(){
     const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
                   FROM employees
@@ -143,7 +146,7 @@ async function getEmployees(){
     init()
 }
 
-//====================insert departmenet to departments=====================
+//================================insert departmenet to departments==================================
 function createDepartment(){
     inquirer.prompt([
     {
@@ -172,7 +175,7 @@ init();
 }
 
 
-//==============================Add a role============================
+//===========================================Add a role============================================
 async function createRole(){
 
 //get the list of all department with department_id to make the choices object list
@@ -215,7 +218,7 @@ init();
     })
 }
 
-//===========================add a new employee===============================
+//=========================================add a new employee=======================================
 async function createEmployee(){
 //get the list of all roles with role_id to make the choices of employee's role
     const choiceRole =[];
@@ -281,7 +284,7 @@ async function createEmployee(){
    })
 }
 
-//===========================upadate role=====================================
+//========================================upadate role==============================================
 async function updateRole(){
     const choiceEmployee = [];
     //get all the employee list
@@ -330,7 +333,7 @@ async function updateRole(){
     })
 }
 
-//========================update manager=================================
+//=====================================update manager===============================================
 
 async function updateManager(){
 
@@ -388,7 +391,7 @@ async function updateManager(){
     })
 }
 
-//===================view all employee by manager==========================
+//=================================view all employee by manager=====================================
 
 async function viewEmployeeByManager(){
 
@@ -441,7 +444,7 @@ async function viewEmployeeByManager(){
 }
 
 
-//============= View All Employees By Departments ==========================//
+//=============================View All Employees By Departments=================================//
 
 // async function viewEmployeeByDepartment(){
 
@@ -472,7 +475,7 @@ async function viewEmployeeByManager(){
 
 
 
-//=========================Remove=============================================
+//===========================================Remove================================================
 //Delete a Department
 async function removeDepartment(){
     const choiceDepartment = [];
@@ -570,7 +573,7 @@ async function removeEmployee(){
   };
 
 
-//============================viewBudgets========================================
+//=======================================viewBudgets===============================================
 async function viewBudgets(){
   console.log('Showing budget by department...\n');
 
