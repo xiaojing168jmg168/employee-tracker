@@ -424,7 +424,7 @@ async function viewEmployeeByManager(){
     }
 
 ])
- .then(answer => {
+ .then( async (answer) => {
      let manager_id = answer.choiceManager !== 0 ? answer.choiceManager: null;
     const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
                   FROM employees
@@ -434,7 +434,7 @@ async function viewEmployeeByManager(){
                   WHERE employees.manager_id = ?`;
   
 
-   const result = pool.query(sql,manager_id);
+   const result = await pool.query(sql,manager_id);
     console.log(result);
     console.table(result[0]);
     init();
