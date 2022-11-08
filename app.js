@@ -39,60 +39,62 @@ function init(){
     ])
      .then((answers) =>{
         if(answers.choices === "View all departments"){
-        getDepartments();
+          getDepartments();
         };
 
         if(answers.choices === "View all roles"){
-        getRoles();
+           getRoles();
         };
 
         if(answers.choices === "View all employees"){
-        getEmployees();
+            getEmployees();
         };
 
         if(answers.choices === "Add a Department"){
-        createDepartment();
+            createDepartment();
         };
 
         if(answers.choices === "Add a role"){
-        createRole();
+            createRole();
         };
 
         if(answers.choices === "Add an employee"){
-        createEmployee();
+            createEmployee();
         };
 
         if(answers.choices === "Update an employee role"){
-        updateRole();
+            updateRole();
         };
 
         if(answers.choices === "Update an employee manager"){
-        updateManager();
+            updateManager();
         };
 
         if(answers.choices === "View employees by manager"){
-        viewEmployeeByManager();
+            viewEmployeeByManager();
         };
 
-
-
+       if(answers.choices === "View employees by department"){
+            viewEmployeeByDepartment()
+        };
+       
         if(answers.choices === "Delete a department"){
-        removeDepartment();
+            removeDepartment();
         };
 
         if(answers.choices === "Delete a role"){
-        removeRole();
+            removeRole();
         };
 
         if(answers.choices === "Delet an employee"){
-        removeEmployee();
+            removeEmployee();
         };
         
         if(answers.choices === "View department budgets"){
-        viewBudgets();
+            viewBudgets();
         }
          if(answers.choices === "Quit"){
-        pool.end();
+            pool.end();
         }
 
     });
@@ -435,7 +437,7 @@ async function viewEmployeeByManager(){
   
 
    const result = await pool.query(sql,manager_id);
-    console.log(result);
+  
     console.table(result[0]);
     init();
 
@@ -444,34 +446,46 @@ async function viewEmployeeByManager(){
 }
 
 
-//=============================View All Employees By Departments=================================//
+//=============================View All Employees By Departments================================
 
-// async function viewEmployeeByDepartment(){
+async function viewEmployeeByDepartment(){
+    const departmentArr =[];
+    const sql = `SELECT department_name As department FROM departments`;
+    const result = await pool.query(sql);
 
-// inquirer.prompt([
-//    {
-//     type: 'list',
-//     name:'choiceDepartment',
-//     message: "Which Department do you want to view Employees for?",
-//     choices: departmentArr,
-//     }
+    console.log(result[0]);
+    result[0].forEach(({department, id}) => {
+    departmentArr.push({
+    name: department,
+    value: id
+    }) 
+    });
 
-// ])
-//  .then(answer => {
+inquirer.prompt([
+   {
+    type: 'list',
+    name:'choiceDepartment',
+    message: "Which Department do you want to view Employees for?",
+    choices: departmentArr,
+    }
+
+])
+ .then( async (answer) => {
+
+      const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager 
+                  FROM employees    
+                  INNER JOIN roles ON employees.role_id = roles.id 
+                  INNER JOIN departments ON roles.department_id = departments.id 
+                  WHERE departments.id = ?;`;
 
 
+      const result = await pool.query(sql, answer.choiceDepartment);
 
-// const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
-//                   FROM employees
-//                   LEFT JOIN roles ON employees.role_id = roles.id
-//                   LEFT JOIN departments on roles.department_id = departments.id
-//                   LEFT JOIN employees manager on employees.manager_id = manager.id
-//     `;
+    console.table(result[0]);
+    init();
 
-
-
-
-// }
+})
+}
 
 
 
