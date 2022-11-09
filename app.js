@@ -450,12 +450,12 @@ async function viewEmployeeByManager(){
 
 async function viewEmployeeByDepartment(){
     const departmentArr =[];
-    const sql = `SELECT department_name As department FROM departments`;
+    const sql = `SELECT * FROM departments`;
     const result = await pool.query(sql);
 
-    result[0].forEach(({department, id}) => {
+    result[0].forEach(({department_name, id}) => {
     departmentArr.push({
-    name: department,
+    name: department_name,
     value: id
     }) 
     });
@@ -469,14 +469,14 @@ inquirer.prompt([
     }
 
 ])
- .then( async (answer) => {
-
+ .then(async (answer) => {
+console.log(answer.choiceDepartment);
       const sql = `SELECT employees.id, employees.first_name, employees.last_name,roles.title, departments.department_name AS department, roles.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
                   FROM employees
                   INNER JOIN employees manager ON employees.manager_id = manager.id
                   INNER JOIN roles ON employees.role_id = roles.id
                   LEFT JOIN departments ON roles.department_id = departments.id
-                  WHERE roles.department_id = ?;`;
+                  WHERE departments.id = ?;`;
 
 
       const result = await pool.query(sql, answer.choiceDepartment);
@@ -495,7 +495,7 @@ async function removeDepartment(){
     const choiceDepartment = [];
     //get all the employee list
     const departments = await pool.query('SELECT * FROM departments');
-    console.log(departments[0]);
+    // console.log(departments[0]);
     departments[0].forEach(({department_name, id}) => {
     choiceDepartment.push({
     name: department_name,
