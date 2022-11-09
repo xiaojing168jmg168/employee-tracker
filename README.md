@@ -63,7 +63,7 @@ Follow the prompts to add, update, or remove if chosen or simply select from the
 
 Each selection, once completed, will bring you back to the main menu. To finish your session, simply select 'Quit'.
 
-<video  width="700" height="600" controls>
+<video  width="500" height="400" controls>
   <source src="utils/employee-tracker2.mp4" type="video/mp4">
 </video>
 
