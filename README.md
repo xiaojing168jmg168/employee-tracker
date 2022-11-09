@@ -11,6 +11,10 @@
 ## Description
 🔍 As a business owner, it would be helpful to be able to view and manage the departments, roles and employees. Employee Tracker is here to help you keep everything organized and updated. It is an all-in-one simple command prompt application.The walkthrough video file is created in the utils directory and can be found [here](utils/employee-tracker2.mp4).
 
+
+https://user-images.githubusercontent.com/110792983/200735009-3289fc53-fda8-4560-8ab9-d1ab495af718.mp4
+
+
 ![screenshot](utils/screenshot.jpg)
 
 ## Table of Contents
